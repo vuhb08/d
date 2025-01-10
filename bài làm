@@ -1,0 +1,124 @@
+class Node:
+    def __init__(self, title, pages):
+        """
+        Node class to represent chapters, sections, subsections, etc.
+        :param title: Title of the node (e.g., chapter, section name)
+        :param pages: Number of pages for this node
+        """
+        self.title = title
+        self.pages = pages
+        self.children = []  # List of child nodes (subsections, etc.)
+
+    def add_child(self, child):
+        """Add a child node."""
+        self.children.append(child)
+
+    def __str__(self, level=0):
+        """String representation of the tree structure."""
+        ret = "\t" * level + f"{self.title} ({self.pages} pages)\n"
+        for child in self.children:
+            ret += child.__str__(level + 1)
+        return ret
+
+class Book:
+    def __init__(self):
+        """
+        Book class to manage the entire tree structure.
+        """
+        self.chapters = []  # List of chapters (root nodes)
+
+    def add_chapter(self, chapter):
+        """Add a chapter to the book."""
+        self.chapters.append(chapter)
+
+    def count_chapters(self):
+        """Count the number of chapters in the book."""
+        return len(self.chapters)
+
+    def find_longest_chapter(self):
+        """Find the chapter with the highest total pages (including its subsections)."""
+        def calculate_total_pages(node):
+            total = node.pages
+            for child in node.children:
+                total += calculate_total_pages(child)
+            return total
+
+        longest_chapter = None
+        max_pages = 0
+
+        for chapter in self.chapters:
+            chapter_pages = calculate_total_pages(chapter)
+            if chapter_pages > max_pages:
+                max_pages = chapter_pages
+                longest_chapter = chapter
+
+        return longest_chapter
+
+    def find_and_delete(self, title):
+        """Find and delete a node by title and update page counts."""
+        def delete_node(node, title):
+            for child in node.children:
+                if child.title == title:
+                    # Adjust the parent's page count
+                    node.pages -= child.pages
+                    node.children.remove(child)
+                    return True
+                if delete_node(child, title):
+                    node.pages -= child.pages
+                    return True
+            return False
+
+        for chapter in self.chapters:
+            if chapter.title == title:
+                self.chapters.remove(chapter)
+                return True
+            if delete_node(chapter, title):
+                return True
+
+        return False
+
+    def __str__(self):
+        """String representation of the book."""
+        ret = "Book Structure:\n"
+        for chapter in self.chapters:
+            ret += str(chapter)
+        return ret
+
+# Example Usage
+if __name__ == "__main__":
+    # Create a book
+    book = Book()
+
+    # Add chapters and sections
+    chapter1 = Node("Chapter 1: Introduction", 10)
+    section1_1 = Node("Section 1.1: Overview", 5)
+    section1_2 = Node("Section 1.2: Basics", 8)
+    chapter1.add_child(section1_1)
+    chapter1.add_child(section1_2)
+
+    chapter2 = Node("Chapter 2: Advanced Topics", 15)
+    section2_1 = Node("Section 2.1: Deep Dive", 10)
+    subsection2_1_1 = Node("Subsection 2.1.1: Details", 5)
+    section2_1.add_child(subsection2_1_1)
+    chapter2.add_child(section2_1)
+
+    book.add_chapter(chapter1)
+    book.add_chapter(chapter2)
+
+    # Display the book structure
+    print(book)
+
+    # Count the number of chapters
+    print("Number of chapters:", book.count_chapters())
+
+    # Find the longest chapter
+    longest = book.find_longest_chapter()
+    if longest:
+        print(f"Longest chapter: {longest.title} with {longest.pages} pages")
+
+    # Find and delete a section
+    print("Deleting 'Section 1.2: Basics'...")
+    book.find_and_delete("Section 1.2: Basics")
+
+    # Display the updated book structure
+    print(book)
