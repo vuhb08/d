@@ -1,0 +1,56 @@
+from collections import deque
+
+# Cài đặt đồ thị sử dụng Ma trận Lân Cận
+class GraphMatrix:
+    def __init__(self, n):
+        self.n = n
+        self.matrix = [[0] * n for _ in range(n)]
+
+    def add_edge(self, u, v):
+        self.matrix[u][v] = 1
+        self.matrix[v][u] = 1  # Nếu là đồ thị vô hướng
+
+    def bfs(self, start):
+        visited = [False] * self.n
+        queue = deque([start])
+        visited[start] = True
+        print("BFS:", end=" ")
+
+        while queue:
+            node = queue.popleft()
+            print(node, end=" ")
+
+            for i in range(self.n):
+                if self.matrix[node][i] == 1 and not visited[i]:
+                    queue.append(i)
+                    visited[i] = True
+        print()
+
+    def dfs(self, start):
+        visited = [False] * self.n
+        print("DFS:", end=" ")
+
+        def dfs_util(node):
+            visited[node] = True
+            print(node, end=" ")
+
+            for i in range(self.n):
+                if self.matrix[node][i] == 1 and not visited[i]:
+                    dfs_util(i)
+
+        dfs_util(start)
+        print()
+
+
+# Nhập thông tin đồ thị
+n = int(input("Nhập số lượng đỉnh: "))
+graph_matrix = GraphMatrix(n)
+e = int(input("Nhập số lượng cạnh: "))
+
+for _ in range(e):
+    u, v = map(int, input("Nhập 2 đỉnh u và v của cạnh (u v): ").split())
+    graph_matrix.add_edge(u, v)
+
+# Duyệt BFS và DFS từ đỉnh 0
+graph_matrix.bfs(0)
+graph_matrix.dfs(0)
